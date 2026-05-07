@@ -11,6 +11,15 @@ export async function POST(req: Request) {
     return new Response("Unauthorized", { status: 401 })
   }
 
+  // Check for API Key
+  if (!process.env.OPENAI_API_KEY) {
+    console.warn("OPENAI_API_KEY missing. Returning mock stream.")
+    return new Response(
+      "This is a simulated AI response because no OpenAI API key is configured. In a production environment, your linguistic sync would be processed by GPT-4o with millisecond latency.",
+      { headers: { "Content-Type": "text/plain" } }
+    )
+  }
+
   const { messages } = await req.json()
 
   const result = await streamText({

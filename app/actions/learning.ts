@@ -11,35 +11,35 @@ export const getDashboardStats = async () => {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
-        progress: true
+        progress: {
+          where: { completed: true }
+        },
+        audioRecords: true
       }
     })
 
-    if (!user) {
-      // Return default stats for new/mock users
-      return {
-        streak: 5,
-        xp: 1250,
-        lessonsCompleted: 12,
-        timeSpent: "4.5h"
-      }
-    }
+    if (!user) return null
 
-    const lessonsCompleted = user.progress.filter(p => p.completed).length
+    const lessonsCompleted = user.progress.length
+    
+    // Calculate total time spent from audio records (mock calculation for now)
+    const timeSpent = user.audioRecords.length > 0 
+      ? `${(user.audioRecords.length * 0.1).toFixed(1)}h` 
+      : "0h"
     
     return {
-      streak: user.streak,
-      xp: user.xp,
+      streak: user.streak || 0,
+      xp: user.xp || 0,
       lessonsCompleted,
-      timeSpent: "0h"
+      timeSpent
     }
   } catch (error) {
     console.error("Database error in getDashboardStats:", error)
     return {
-      streak: 5,
-      xp: 1250,
-      lessonsCompleted: 12,
-      timeSpent: "4.5h"
+      streak: 0,
+      xp: 0,
+      lessonsCompleted: 0,
+      timeSpent: "0h"
     }
   }
 }

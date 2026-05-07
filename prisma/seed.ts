@@ -45,11 +45,18 @@ async function main() {
 
   console.log("Seeding lessons...")
   for (const lesson of lessons) {
+    const id = lesson.title.toLowerCase().replace(/\s+/g, '-')
     await prisma.lesson.upsert({
-      where: { id: lesson.title.toLowerCase().replace(/\s+/g, '-') }, // Using slug as id for seed stability
-      update: {},
+      where: { id },
+      update: {
+        title: lesson.title,
+        description: lesson.description,
+        type: lesson.type,
+        difficulty: lesson.difficulty,
+        content: lesson.content
+      },
       create: {
-        id: lesson.title.toLowerCase().replace(/\s+/g, '-'),
+        id,
         ...lesson
       }
     })
